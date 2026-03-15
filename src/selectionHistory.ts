@@ -20,8 +20,8 @@ export function changeSelections(selections: vscode.Selection[]) {
         }
     }
 
-    let originSelections = editor.selections
-    selectionHistory.push(originSelections)
+    let originSelections: vscode.Selection[] = editor.selections.slice()
+    selectionHistory.push(originSelections);
     editor.selections = selections
 }
 

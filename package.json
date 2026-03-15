@@ -1,72 +1,65 @@
 {
-    "name": "bracket-select",
-    "displayName": "Bracket Select",
-    "description": "Quick select code between brackets, support for (),{} and [], <>",
-    "version": "2.0.2",
-    "publisher": "chunsen",
-    "icon": "icon.png",
-    "engines": {
-        "vscode": "^1.34.0"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/wangchunsen/vscode-bracket-select.git"
-    },
-    "categories": [
-        "Other"
-    ],
-    "activationEvents": [
-        "onCommand:bracket-select.select",
-        "onCommand:bracket-select.select-include"
-    ],
-    "main": "./out/src/bracketSelectMain",
-    "contributes": {
-        "commands": [
-            {
-                "command": "bracket-select.select",
-                "title": "BraSel:Select"
-            },
-            {
-                "command": "bracket-select.undo-select",
-                "title": "BraSel:UndoSelect"
-            },
-            {
-                "command": "bracket-select.select-include",
-                "title": "BraSel:SelectInclude"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "bracket-select.undo-select",
-                "key": "alt+z",
-                "mac": "alt+z",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "bracket-select.select",
-                "key": "alt+a",
-                "mac": "alt+a",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "bracket-select.select-include",
-                "key": "ctrl+alt+a",
-                "mac": "cmd+alt+a",
-                "when": "editorTextFocus"
-            }
-        ]
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "lint": "tslint -p ./",
-        "watch": "tsc -watch -p ./"
-    },
-    "devDependencies": {
-        "@types/node": "^12.12.0",
-        "@types/vscode": "^1.34.0",
-        "tslint": "^5.19.0",
-        "typescript": "^3.8.3"
-    },
-    "dependencies": {}
+	"name": "bracplusplus",
+	"displayName": "BracPlusPlus",
+	"description": "Ultimate bracket manipulation plugins. Mainly for C++",
+	"version": "1.0.0",
+	"publisher": "Juan Calvin Raymond",
+	"icon": "icon.png",
+	"engines": {
+		"vscode": "^1.111.0"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/JuanCalvinRaymond/Bracplusplus.git"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+	],
+	"main": "./out/src/bracketSelectMain",
+	"contributes": {
+		"commands": [
+			{
+				"command": "bracket-plus-plus.select",
+				"title": "BracPlusPlus: Select Inside Bracket"
+			},
+			{
+				"command": "bracket-plus-plus.undo-select",
+				"title": "BracPlusPlus: UndoSelect"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "bracket-plus-plus.undo-select",
+				"key": "alt+z",
+				"mac": "alt+z",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "bracket-plus-plus.select",
+				"key": "alt+a",
+				"mac": "alt+a",
+				"when": "editorTextFocus"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "tslint -p ./",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^25.0.1",
+		"@types/vscode": "^1.105.0",
+		"tslint": "^6.1.3",
+		"typescript": "^5.3.0"
+	},
+	"dependencies": {},
+	"__metadata": {
+		"installedTimestamp": 1773010092134,
+		"targetPlatform": "undefined",
+		"size": 1914522
+	}
 }
