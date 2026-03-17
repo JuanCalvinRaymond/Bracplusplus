@@ -14,13 +14,13 @@ Just run command `BracPlusPlus: Select Inside Bracket` or type `alt+a` to select
 This plugin is works for **multiple cursors**  now.
 
 ## TODO:
-Add support to delete content inside a bracket in a single keypress.
-Add support to delete the whole bracket in a single keypress.
+* Add support to delete content inside a bracket in a single keypress.
+* Add support to delete the whole bracket in a single keypress.
 
 ## Maybe:
-Add support to delete word without removing space. (VS Code have delete word but also remove the space before it, WHY?????)
-Add support to add bracket on selected word
-Add support to swap bracket and quote type
+* Add support to delete word without removing space. (VS Code have delete word but also remove the space before it, WHY?????)
+* Add support to add bracket on selected word
+* Add support to swap bracket and quote type
 
 ## Extension Settings
 
