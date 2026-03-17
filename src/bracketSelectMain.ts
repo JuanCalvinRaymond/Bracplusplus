@@ -21,7 +21,6 @@ function findBackward(text, index) {
     const bracketStack = [];
     for (let i = index; i >= 0; i--) {
         let char = text.charAt(i);
-        console.log('char: ', char);
         // if it's a quote, we can not infer it is a open or close one
         //so just return, this is for the case current selection is inside a string;
         if (bracketUtil_1.bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
@@ -96,7 +95,6 @@ function toVscodeSelection({ start, end }) {
 }
 
 function isMatch(r1, r2) {
-    console.log('Is Match Backward Result', r1, ' Forward Result: ', r2);
     return r1 != null && r2 != null && bracketUtil_1.bracketUtil.isMatch(r1.bracket, r2.bracket);
 }
 
@@ -131,8 +129,6 @@ function selectText(selection) {
       && bracketUtil_1.bracketUtil.isQuoteBracket(forwardResult.bracket)) {
         forwardResult = findForward(searchContext.text, forwardResult.offset + 1);
     }
-
-    console.log('Backward Result', backwardResult, ' Forward Result: ', forwardResult);
 
     while (!isMatch(backwardResult, forwardResult)) {
         if(backwardResult.bracket === "<" || bracketUtil_1.bracketUtil.isQuoteBracket(backwardResult.bracket))

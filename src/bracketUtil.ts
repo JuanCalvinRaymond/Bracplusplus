@@ -16,7 +16,6 @@ var bracketUtil;
         if (isQuoteBracket(open)) {
             return open === close;
         }
-        console.log('Open: ', open, 'Close: ', close);
         return bracketPairs.findIndex(p => p[0] === open && p[1] === close) >= 0 || angleBracketPairs.findIndex(p => p[0] === open && p[1] === close) >= 0;
     }
     bracketUtil.isMatch = isMatch;

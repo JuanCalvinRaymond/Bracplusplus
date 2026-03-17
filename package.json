@@ -3,7 +3,7 @@
 	"displayName": "BracPlusPlus",
 	"description": "Ultimate bracket manipulation plugins. Mainly for C++",
 	"version": "1.0.0",
-	"publisher": "Juan Calvin Raymond",
+	"publisher": "JuanCalvinRaymond",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.111.0"
