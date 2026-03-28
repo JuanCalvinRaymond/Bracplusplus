@@ -8,27 +8,27 @@ function selectionLength(editor: vscode.TextEditor, selection: vscode.Selection)
 }
 
 export function changeSelections(selections: vscode.Selection[]) {
-    let editor = vscode.window.activeTextEditor
+    let editor: vscode.TextEditor = vscode.window.activeTextEditor
     if (selectionHistory.length > 0) {
         //if we can tell that it's a new round of commands, so that will clean the history
-        let lasSelections = selectionHistory[selectionHistory.length - 1]
-        if (lasSelections.length !== selections.length ||
+        let lastSelections = selectionHistory[selectionHistory.length - 1]
+        if (lastSelections.length !== selections.length ||
             // if there is some slection in the new slections that length is smaller than the conrespond selection in the hisory
-            lasSelections.findIndex((s, i) => selectionLength(editor, s) > selectionLength(editor, selections[i])) >= 0
+            lastSelections.findIndex((s, i) => selectionLength(editor, s) > selectionLength(editor, selections[i])) >= 0
         ) {
             selectionHistory = []
         }
     }
 
-    let originSelections: vscode.Selection[] = editor.selections.slice()
+    let originSelections: vscode.Selection[] = editor.selections.slice();
     selectionHistory.push(originSelections);
     editor.selections = selections
 }
 
-export function unDoSelect() {
+export function undoSelect() {
     let editor = vscode.window.activeTextEditor;
-    let lasSelections = selectionHistory.pop()
-    if (lasSelections) {
-        editor.selections = lasSelections;
+    let lastSelections = selectionHistory.pop()
+    if (lastSelections) {
+        editor.selections = lastSelections;
     }
 }

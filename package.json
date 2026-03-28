@@ -3,7 +3,7 @@
 	"displayName": "BracPlusPlus",
 	"description": "Ultimate bracket manipulation plugins. Mainly for C++",
 	"version": "1.0.0",
-	"publisher": "JuanCalvinRaymond",
+	"publisher": "juan-raymond",
 	"icon": "icon.png",
 	"engines": {
 		"vscode": "^1.111.0"
@@ -27,6 +27,10 @@
 			{
 				"command": "bracket-plus-plus.undo-select",
 				"title": "BracPlusPlus: UndoSelect"
+			},
+			{
+				"command": "bracket-plus-plus.deleteContent",
+				"title": "BracPlusPlus: Delete Inside Bracket"
 			}
 		],
 		"keybindings": [
@@ -40,7 +44,13 @@
 				"command": "bracket-plus-plus.select",
 				"key": "alt+a",
 				"mac": "alt+a",
-				"when": "editorTextFocus"
+				"when": "editorTextFocus",
+			},
+			{
+				"command": "bracket-plus-plus.deleteContent",
+				"key": "alt+d",
+				"mac": "alt+d",
+				"when": "editorTextFocus",
 			}
 		]
 	},
