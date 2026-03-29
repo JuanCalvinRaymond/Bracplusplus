@@ -12,8 +12,8 @@ class SearchResult {
         this.offset = offset;
     }
 
-    bracket: any
-    offset: any
+    bracket: string
+    offset: number
 }
 
 function findBackward(text: string, index: number) {
@@ -160,17 +160,35 @@ function expandSelection(selection) {
 
     // We are next to a bracket
     // this is the case for double press select
-    let selectionStart, selectionEnd;
-    if (backwardStarter == backwardResult.offset && forwardStarter == forwardResult.offset) {
+    let selectionStart: number, selectionEnd: number;
+    if (backwardStarter === backwardResult.offset && forwardStarter === forwardResult.offset) {
         selectionStart = backwardStarter - 1;
         selectionEnd = forwardStarter + 1;
     }
     else {
         selectionStart = backwardResult.offset;
         selectionEnd = forwardResult.offset;
-
     }
+    let temp = selectionStart;
+    do {
+        temp += 1;
+        console.log('Start char:',text.charCodeAt(temp));
+    }
+    while ((text.charAt(temp) === "\r" || text.charAt(temp) === "\n" || text.charAt(temp) === " ")
+        && temp < selectionEnd);
+    if (temp < selectionEnd) {
 
+        selectionStart = temp-1;
+    }
+    do
+    {
+        temp -= 1;
+    }
+    while ((text.charAt(temp) === "\r" || text.charAt(temp) === "\n" || text.charAt(temp) === " ")
+        && temp > selectionStart);
+    if (temp > selectionStart) {
+        selectionEnd = temp + 1;
+    }
     return {
         start: selectionStart,
         end: selectionEnd,

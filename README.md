@@ -9,12 +9,14 @@ Hope u enjoy the plugins!
 Main focus is for C++ development if you want your language to be supported, you can let me know.
 
 ## Quick start
-Just run command `BracPlusPlus: Select Inside Bracket` or type `alt+a` to select text between brackets. If you wish to select more, just press it again.
+You can run command `BracPlusPlus: Select Inside Bracket` or type `alt+a` to select text between brackets. If you wish to select more, just press it again.
+
+If you want to delete the content `BracPlusPlus: Delete Inside Bracket` or type `alt+d` to delete it, this will delete everything inside a bracket.
 
 This plugin is works for **multiple cursors**  now.
 
 ## TODO:
-* Add support to delete content inside a bracket in a single keypress.
+* Add support to delete content inside a bracket in a single keypress. :white_check_mark:
 * Add support to delete the whole bracket in a single keypress.
 
 ## Maybe:
