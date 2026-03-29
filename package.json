@@ -26,10 +26,14 @@
 			},
 			{
 				"command": "bracket-plus-plus.undo-select",
-				"title": "BracPlusPlus: UndoSelect"
+				"title": "BracPlusPlus: Undo Select"
 			},
 			{
-				"command": "bracket-plus-plus.deleteContent",
+				"command": "bracket-plus-plus.delete-bracket",
+				"title": "BracPlusPlus: Delete Whole Bracket"
+			},
+			{
+				"command": "bracket-plus-plus.delete-content",
 				"title": "BracPlusPlus: Delete Inside Bracket"
 			}
 		],
@@ -44,12 +48,20 @@
 				"command": "bracket-plus-plus.select",
 				"key": "alt+a",
 				"mac": "alt+a",
-				"when": "editorTextFocus"
+				"when": "editorTextFocus",
+				"args": false
 			},
 			{
-				"command": "bracket-plus-plus.deleteContent",
+				"command": "bracket-plus-plus.delete-content",
 				"key": "alt+d",
 				"mac": "alt+d",
+				"when": "editorTextFocus",
+				"args": true
+			},
+			{
+				"command": "bracket-plus-plus.delete-bracket",
+				"key": "alt+e",
+				"mac": "alt+e",
 				"when": "editorTextFocus"
 			}
 		]

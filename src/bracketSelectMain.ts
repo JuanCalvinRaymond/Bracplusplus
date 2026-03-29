@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 import * as vscode from 'vscode';
-const bracketUtil_1 = require("./bracketUtil");
+const bracketUtil = require("./bracketUtil");
 const history = require("./selectionHistory");
 
 class SearchResult {
@@ -22,16 +22,16 @@ function findBackward(text: string, index: number) {
         let char = text.charAt(i);
         // If it's a quote, we can not infer it is a open or close one
         // so just return, this is for the case current selection is inside a string
-        if (bracketUtil_1.bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
+        if (bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
             return new SearchResult(char, i);
         }
-        if (bracketUtil_1.bracketUtil.isOpenBracket(char)) {
+        if (bracketUtil.isOpenBracket(char)) {
             if (bracketStack.length === 0) {
                 return new SearchResult(char, i);
             }
             else {
                 let top = bracketStack.pop();
-                if (!bracketUtil_1.bracketUtil.isMatch(char, top)) {
+                if (!bracketUtil.isMatch(char, top)) {
                     if (top === '>') {
                         return new SearchResult(char, i);
                     }
@@ -39,7 +39,7 @@ function findBackward(text: string, index: number) {
                 }
             }
         }
-        else if (bracketUtil_1.bracketUtil.isCloseBracket(char)) {
+        else if (bracketUtil.isCloseBracket(char)) {
             bracketStack.push(char);
         }
     }
@@ -52,16 +52,16 @@ function findForward(text: string, index: number) {
         let char = text.charAt(i);
         // If it's a quote, we can not infer it is a open or close one
         // so just return, this is for the case current selection is inside a string
-        if (bracketUtil_1.bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
+        if (bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
             return new SearchResult(char, i);
         }
-        if (bracketUtil_1.bracketUtil.isCloseBracket(char)) {
+        if (bracketUtil.isCloseBracket(char)) {
             if (bracketStack.length == 0) {
                 return new SearchResult(char, i);
             }
             else {
                 let top = bracketStack.pop();
-                if (!bracketUtil_1.bracketUtil.isMatch(top, char)) {
+                if (!bracketUtil.isMatch(top, char)) {
                     if (top === '<') {
                         return new SearchResult(char, i);
                     }
@@ -69,137 +69,124 @@ function findForward(text: string, index: number) {
                 }
             }
         }
-        else if (bracketUtil_1.bracketUtil.isOpenBracket(char)) {
+        else if (bracketUtil.isOpenBracket(char)) {
             bracketStack.push(char);
         }
     }
     return null;
 }
 
-function getSearchContext(selection) {
-    const editor = vscode.window.activeTextEditor;
-    let selectionStart = editor.document.offsetAt(selection.start);
-    let selectionEnd = editor.document.offsetAt(selection.end);
-    return {
-        text: editor.document.getText(),
-        backwardStarter: selectionStart - 1, //coverage vscode selection index to text index
-        forwardStarter: selectionEnd
-    };
-}
-function toVscodeSelection({ start, end }) {
-    const editor = vscode.window.activeTextEditor;
-    return new vscode.Selection(editor.document.positionAt(start + 1), //convert text index to vs selection index
-        editor.document.positionAt(end));
-}
-
 function isMatch(r1, r2) {
-    return r1 != null && r2 != null && bracketUtil_1.bracketUtil.isMatch(r1.bracket, r2.bracket);
+    return r1 != null && r2 != null && bracketUtil.isMatch(r1.bracket, r2.bracket);
 }
 
-function selectText() {
+function selectText(isDelete: boolean) {
     const editor = vscode.window.activeTextEditor;
     let originSelections = editor.selections;
     let selections = originSelections.map((originSelection) => {
         const newSelect = expandSelection(originSelection);
-        return newSelect ? toVscodeSelection(newSelect) : originSelection;
+        return newSelect ? newSelect: originSelection;
     });
-    let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
-    if (haveChange) {
-        history.changeSelections(selections);
+    if (isDelete) {
+        editor.edit((editBuilder) => {
+            selections.forEach(selection => {
+                editBuilder.delete(selection);
+            });
+        });
+    }
+    else {
+        let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
+        if (haveChange) {
+            history.changeSelections(selections);
+        }
     }
 }
 
-function deleteText() {
-    const editor = vscode.window.activeTextEditor;
-    let originSelections = editor.selections;
-    let selections = originSelections.map((originSelection) => {
-        const newSelect = expandSelection(originSelection);
-        return newSelect ? toVscodeSelection(newSelect) : originSelection;
-    });
-    editor.edit((editBuilder) => {
-        selections.forEach(selection => {
-            editBuilder.delete(selection);
-        });
-    });
-}
-function expandSelection(selection) {
-    const searchContext = getSearchContext(selection);
 
-    var { text, backwardStarter, forwardStarter } = searchContext;
+function expandSelection(selection: vscode.Selection) {
+    const editor = vscode.window.activeTextEditor;
+    let selectionStart: number = editor.document.offsetAt(selection.start);
+    let selectionEnd: number = editor.document.offsetAt(selection.end);
+
+    let text: string = editor.document.getText();
+    let backwardStarter: number = selectionStart - 1; //coverage vscode selection index to text index
+    let forwardStarter: number = selectionEnd
+
     if (backwardStarter < 0 || forwardStarter >= text.length) {
         return;
     }
 
-    var backwardResult = findBackward(searchContext.text, searchContext.backwardStarter);
-    var forwardResult = findForward(searchContext.text, searchContext.forwardStarter);
+    let backwardResult = findBackward(text, backwardStarter);
+    let forwardResult = findForward(text, forwardStarter);
 
     // If the bracker is a quote find matching close or open quote
-    while (bracketUtil_1.bracketUtil.isQuoteBracket(backwardResult.bracket) &&
+    while (bracketUtil.isQuoteBracket(backwardResult.bracket) &&
         !isMatch(backwardResult, forwardResult)) {
-        backwardResult = findBackward(searchContext.text, backwardResult.offset - 1);
+        backwardResult = findBackward(text, backwardResult.offset - 1);
     }
-    while (bracketUtil_1.bracketUtil.isQuoteBracket(forwardResult.bracket) &&
+    while (bracketUtil.isQuoteBracket(forwardResult.bracket) &&
         !isMatch(backwardResult, forwardResult)) {
-        forwardResult = findForward(searchContext.text, forwardResult.offset + 1);
+        forwardResult = findForward(text, forwardResult.offset + 1);
     }
 
     // Find outer bracket until we find a match.
     // Ignore < > since it can be operator. ex. if(size_t i{0}; i < 10; ++i)
     while (!isMatch(backwardResult, forwardResult)) {
-        if (backwardResult.bracket === "<" || bracketUtil_1.bracketUtil.isQuoteBracket(backwardResult.bracket)) {
-            backwardResult = findBackward(searchContext.text, backwardResult.offset - 1);
+        if (backwardResult.bracket === "<" || bracketUtil.isQuoteBracket(backwardResult.bracket)) {
+            backwardResult = findBackward(text, backwardResult.offset - 1);
             continue;
         }
-        else if (forwardResult.bracket === ">" || bracketUtil_1.bracketUtil.isQuoteBracket(forwardResult.bracket)) {
-            forwardResult = findForward(searchContext.text, forwardResult.offset + 1);
+        else if (forwardResult.bracket === ">" || bracketUtil.isQuoteBracket(forwardResult.bracket)) {
+            forwardResult = findForward(text, forwardResult.offset + 1);
             continue;
         }
         vscode.window.showInformationMessage('No matched bracket pairs found');
         return;
     }
 
-    // We are next to a bracket
-    // this is the case for double press select
-    let selectionStart: number, selectionEnd: number;
-    if (backwardStarter === backwardResult.offset && forwardStarter === forwardResult.offset) {
-        selectionStart = backwardStarter - 1;
-        selectionEnd = forwardStarter + 1;
-    }
-    else {
-        selectionStart = backwardResult.offset;
-        selectionEnd = forwardResult.offset;
-    }
+    // Ignore the whitespace to retain the formatting.
+    selectionStart = backwardResult.offset;
+    selectionEnd = forwardResult.offset;
     let temp = selectionStart;
     do {
         temp += 1;
-        console.log('Start char:',text.charCodeAt(temp));
     }
     while ((text.charAt(temp) === "\r" || text.charAt(temp) === "\n" || text.charAt(temp) === " ")
         && temp < selectionEnd);
+
     if (temp < selectionEnd) {
 
-        selectionStart = temp-1;
+        selectionStart = temp - 1;
     }
-    do
-    {
+    temp = selectionEnd;
+    do {
         temp -= 1;
     }
     while ((text.charAt(temp) === "\r" || text.charAt(temp) === "\n" || text.charAt(temp) === " ")
         && temp > selectionStart);
+
     if (temp > selectionStart) {
         selectionEnd = temp + 1;
     }
-    return {
-        start: selectionStart,
-        end: selectionEnd,
-    };
+
+    // We are next to a bracket
+    // this is the case for double press select
+    if (editor.document.offsetAt(selection.start) === selectionStart + 1 &&
+        editor.document.offsetAt(selection.end) === selectionEnd) {
+        selectionStart = backwardResult.offset - 1;
+        selectionEnd = forwardResult.offset + 1;
+    }
+
+    return new vscode.Selection(editor.document.positionAt(selectionStart + 1),
+        editor.document.positionAt(selectionEnd));
 }
 // Main extension point
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('bracket-plus-plus.select', selectText),
         vscode.commands.registerCommand('bracket-plus-plus.undo-select', history.undoSelect),
-        vscode.commands.registerCommand('bracket-plus-plus.deleteContent', deleteText)
+        vscode.commands.registerCommand('bracket-plus-plus.deleteContent', selectText),
+        vscode.commands.registerCommand('bracket-plus-plus.deleteBracket', selectText)
     );
 }
 // This method is called when your extension is deactivated
