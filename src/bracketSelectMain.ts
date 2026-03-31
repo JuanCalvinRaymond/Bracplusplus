@@ -185,8 +185,8 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         vscode.commands.registerCommand('bracket-plus-plus.select', selectText),
         vscode.commands.registerCommand('bracket-plus-plus.undo-select', history.undoSelect),
-        vscode.commands.registerCommand('bracket-plus-plus.deleteContent', selectText),
-        vscode.commands.registerCommand('bracket-plus-plus.deleteBracket', selectText)
+        vscode.commands.registerCommand('bracket-plus-plus.delete-content', selectText),
+        vscode.commands.registerCommand('bracket-plus-plus.delete-bracket', selectText)
     );
 }
 // This method is called when your extension is deactivated
