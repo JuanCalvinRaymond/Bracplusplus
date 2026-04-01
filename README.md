@@ -1,17 +1,18 @@
 # BracPlusPlus
-I want VIM amount of control with VS Code flexibility of customization.
+I want VIM level of control with VS Code flexibility of customization.
 Since VSCode doesn't provide that I made a plugin that support quick select text between matched brackets.
 This plugin supports `()`, `{}`, `[]`, `<>`,`""`, `''`, and ``` `` ```, and can not be customized.
 
-![bracket-select-animation](bracket-select.gif)
 
 Hope u enjoy the plugins!
 Main focus is for C++ development if you want your language to be supported, you can let me know.
 
 ## Quick start
 You can run command `BracPlusPlus: Select Inside Bracket` or type `alt+a` to select text between brackets. If you wish to select more, just press it again.
+![bracket-select-animation](bracket-select.gif)
 
 If you want to delete the content `BracPlusPlus: Delete Inside Bracket` or type `alt+d` to delete it, this will delete everything inside a bracket.
+![bracket-select-animation](bracket-delete-content.gif)
 
 This plugin is works for **multiple cursors**  now.
 

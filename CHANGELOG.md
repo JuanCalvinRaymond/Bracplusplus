@@ -7,3 +7,9 @@
 
 ## [1.1.1]
 - Fix expanding selection bug due to whitespace change.
+
+## [1.1.2]
+- Fix command broken and code cleanup.
+
+## [1.1.3]
+- Update changelog and readme.
