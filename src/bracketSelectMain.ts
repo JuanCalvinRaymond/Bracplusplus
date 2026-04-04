@@ -7,13 +7,13 @@ const bracketUtil = require("./bracketUtil");
 const history = require("./selectionHistory");
 
 class SearchResult {
-    constructor(bracket, offset) {
+    bracket: string
+    offset: number
+
+    constructor(bracket: string, offset: number) {
         this.bracket = bracket;
         this.offset = offset;
     }
-
-    bracket: string
-    offset: number
 }
 
 function findBackward(text: string, index: number) {
@@ -76,48 +76,28 @@ function findForward(text: string, index: number) {
     return null;
 }
 
-function isMatch(r1, r2) {
-    return r1 != null && r2 != null && bracketUtil.isMatch(r1.bracket, r2.bracket);
+function isMatch(r1: SearchResult, r2: SearchResult) {
+    return r1 && r2 && bracketUtil.isMatch(r1.bracket, r2.bracket);
 }
 
-function selectText(isDelete: boolean) {
+function expandSelection(selection: vscode.Selection, includeBracket: boolean) {
     const editor = vscode.window.activeTextEditor;
-    let originSelections = editor.selections;
-    let selections = originSelections.map((originSelection) => {
-        const newSelect = expandSelection(originSelection);
-        return newSelect ? newSelect: originSelection;
-    });
-    if (isDelete) {
-        editor.edit((editBuilder) => {
-            selections.forEach(selection => {
-                editBuilder.delete(selection);
-            });
-        });
-    }
-    else {
-        let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
-        if (haveChange) {
-            history.changeSelections(selections);
-        }
-    }
-}
-
-
-function expandSelection(selection: vscode.Selection) {
-    const editor = vscode.window.activeTextEditor;
-    let selectionStart: number = editor.document.offsetAt(selection.start);
+    let selectionStart: number = editor.document.offsetAt(selection.start) - 1; //coverage vscode selection index to text index
     let selectionEnd: number = editor.document.offsetAt(selection.end);
 
-    let text: string = editor.document.getText();
-    let backwardStarter: number = selectionStart - 1; //coverage vscode selection index to text index
-    let forwardStarter: number = selectionEnd
+    const text: string = editor.document.getText();
 
-    if (backwardStarter < 0 || forwardStarter >= text.length) {
+    if (selectionStart < 0 || selectionEnd >= text.length) {
         return;
     }
 
-    let backwardResult = findBackward(text, backwardStarter);
-    let forwardResult = findForward(text, forwardStarter);
+    let backwardResult = findBackward(text, selectionStart);
+    let forwardResult = findForward(text, selectionEnd);
+
+    if (backwardResult=== null || forwardResult === null)
+    {
+        return;
+    }
 
     // If the bracker is a quote find matching close or open quote
     while (bracketUtil.isQuoteBracket(backwardResult.bracket) &&
@@ -142,6 +122,12 @@ function expandSelection(selection: vscode.Selection) {
         }
         vscode.window.showInformationMessage('No matched bracket pairs found');
         return;
+    }
+
+    if(includeBracket)
+    {
+        return new vscode.Selection(editor.document.positionAt(backwardResult.offset),
+        editor.document.positionAt(forwardResult.offset + 1));
     }
 
     // Ignore the whitespace to retain the formatting.
@@ -180,13 +166,114 @@ function expandSelection(selection: vscode.Selection) {
     return new vscode.Selection(editor.document.positionAt(selectionStart + 1),
         editor.document.positionAt(selectionEnd));
 }
+
+function findWord(selection: vscode.Selection) {
+    const editor  = vscode.window.activeTextEditor;
+    const text: string = editor.document.getText();
+    let selectionStart: number = editor.document.offsetAt(selection.start) - 1; //coverage vscode selection index to text index
+    let selectionEnd: number = editor.document.offsetAt(selection.end);
+
+    if (selectionStart < 0 || selectionEnd >= text.length) {
+        return;
+    }
+
+    let backwardResult: number = (() => {
+        for (let i = selectionStart; i >= 0; i--) {
+        let char = text.charAt(i);
+        // Find a non alphanum with underscore
+        if (!/[a-zA-Z0-9_]/.test(char)) {
+            return i;
+        }
+    }})();
+    let forwardResult: number = (() => {
+        for (let i = selectionEnd; i < text.length; i++) {
+        let char = text.charAt(i);
+        // Find a non alphanum with underscore
+        if (!/[a-zA-Z0-9_]/.test(char)) {
+            return i;
+        }
+    }})();
+
+    return new vscode.Selection(editor.document.positionAt(backwardResult + 1),
+                                editor.document.positionAt(forwardResult));
+}
+
+function selectContent(isDelete: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    let originSelections = editor.selections;
+    let selections = originSelections.map((originSelection) => {
+        const newSelect = expandSelection(originSelection, false);
+        return newSelect ? newSelect: originSelection;
+    });
+    if (isDelete) {
+        editor.edit((editBuilder) => {
+            selections.forEach(selection => {
+                editBuilder.delete(selection);
+            });
+        });
+    }
+    else {
+        let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
+        if (haveChange) {
+            history.changeSelections(selections);
+        }
+    }
+}
+
+function selectBracket(isDelete: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    let originSelections = editor.selections;
+    let selections = originSelections.map((originSelection) => {
+        const newSelect = expandSelection(originSelection, true);
+        return newSelect ? newSelect: originSelection;
+    });
+    if (isDelete) {
+        editor.edit((editBuilder) => {
+            selections.forEach(selection => {
+                editBuilder.delete(selection);
+            });
+        });
+    }
+    else {
+        let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
+        if (haveChange) {
+            history.changeSelections(selections);
+        }
+    }
+}
+
+function selectWord(isDelete: boolean) {
+    const editor = vscode.window.activeTextEditor;
+    let originSelections = editor.selections;
+    let selections = originSelections.map((originSelection) => {
+        const newSelect = findWord(originSelection);
+        return newSelect ? newSelect: originSelection;
+    });
+    if (isDelete) {
+        editor.edit((editBuilder) => {
+            selections.forEach(selection => {
+                editBuilder.delete(selection);
+            });
+        });
+    }
+    else {
+        let haveChange = selections.findIndex((s, i) => !s.isEqual(originSelections[i])) >= 0;
+        if (haveChange) {
+            history.changeSelections(selections);
+        }
+    }
+}
+
 // Main extension point
 export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('bracket-plus-plus.select', selectText),
         vscode.commands.registerCommand('bracket-plus-plus.undo-select', history.undoSelect),
-        vscode.commands.registerCommand('bracket-plus-plus.delete-content', selectText),
-        vscode.commands.registerCommand('bracket-plus-plus.delete-bracket', selectText)
+        vscode.commands.registerCommand('bracket-plus-plus.select-content', selectContent),
+        vscode.commands.registerCommand('bracket-plus-plus.delete-content', selectContent),
+        vscode.commands.registerCommand('bracket-plus-plus.select-bracket', selectBracket),
+        vscode.commands.registerCommand('bracket-plus-plus.delete-bracket', selectBracket),
+        vscode.commands.registerCommand('bracket-plus-plus.select-word',    selectWord),
+        vscode.commands.registerCommand('bracket-plus-plus.delete-word',    selectWord)
     );
 }
 // This method is called when your extension is deactivated

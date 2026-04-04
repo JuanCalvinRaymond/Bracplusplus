@@ -13,3 +13,6 @@
 
 ## [1.1.3]
 - Update changelog and readme.
+
+## [1.2.1]
+- Add feature to select/delete the whole bracket or word.

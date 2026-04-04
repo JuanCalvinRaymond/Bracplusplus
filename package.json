@@ -2,7 +2,7 @@
 	"name": "bracplusplus",
 	"displayName": "BracPlusPlus",
 	"description": "Ultimate bracket manipulation plugins. Mainly for C++",
-	"version": "1.1.3",
+	"version": "1.2.1",
 	"publisher": "juan-raymond",
 	"icon": "icon.png",
 	"engines": {
@@ -21,20 +21,32 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "bracket-plus-plus.select",
+				"command": "bracket-plus-plus.undo-select",
+				"title": "BracPlusPlus: Undo Select"
+			},
+			{
+				"command": "bracket-plus-plus.select-content",
 				"title": "BracPlusPlus: Select Inside Bracket"
 			},
 			{
-				"command": "bracket-plus-plus.undo-select",
-				"title": "BracPlusPlus: Undo Select"
+				"command": "bracket-plus-plus.delete-content",
+				"title": "BracPlusPlus: Delete Inside Bracket"
+			},
+			{
+				"command": "bracket-plus-plus.select-bracket",
+				"title": "BracPlusPlus: Select Whole Bracket"
 			},
 			{
 				"command": "bracket-plus-plus.delete-bracket",
 				"title": "BracPlusPlus: Delete Whole Bracket"
 			},
 			{
-				"command": "bracket-plus-plus.delete-content",
-				"title": "BracPlusPlus: Delete Inside Bracket"
+				"command": "bracket-plus-plus.select-word",
+				"title": "BracPlusPlus: Select Word"
+			},
+			{
+				"command": "bracket-plus-plus.delete-word",
+				"title": "BracPlusPlus: Delete Word"
 			}
 		],
 		"keybindings": [
@@ -45,7 +57,7 @@
 				"when": "editorTextFocus"
 			},
 			{
-				"command": "bracket-plus-plus.select",
+				"command": "bracket-plus-plus.select-content",
 				"key": "alt+a",
 				"mac": "alt+a",
 				"when": "editorTextFocus",
@@ -53,16 +65,38 @@
 			},
 			{
 				"command": "bracket-plus-plus.delete-content",
-				"key": "alt+d",
-				"mac": "alt+d",
+				"key": "alt+s",
+				"mac": "alt+s",
 				"when": "editorTextFocus",
 				"args": true
 			},
 			{
-				"command": "bracket-plus-plus.delete-bracket",
+				"command": "bracket-plus-plus.select-bracket",
 				"key": "alt+e",
 				"mac": "alt+e",
-				"when": "editorTextFocus"
+				"when": "editorTextFocus",
+				"args": false
+			},
+			{
+				"command": "bracket-plus-plus.delete-bracket",
+				"key": "alt+f",
+				"mac": "alt+f",
+				"when": "editorTextFocus",
+				"args": true
+			},
+			{
+				"command": "bracket-plus-plus.select-word",
+				"key": "alt+d",
+				"mac": "alt+d",
+				"when": "editorTextFocus",
+				"args": false
+			},
+			{
+				"command": "bracket-plus-plus.delete-word",
+				"key": "alt+r",
+				"mac": "alt+r",
+				"when": "editorTextFocus",
+				"args": true
 			}
 		]
 	},
