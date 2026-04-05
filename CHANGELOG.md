@@ -16,3 +16,6 @@
 
 ## [1.2.1]
 - Add feature to select/delete the whole bracket or word.
+
+## [1.3.1]
+- Add feature to select/go to user chosen char, can go either forward/backward.

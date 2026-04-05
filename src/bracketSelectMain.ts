@@ -1,8 +1,6 @@
-'use strict';
-Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
-import * as vscode from 'vscode';
+import { Selection, ExtensionContext, QuickPick, QuickPickItem, commands, window } from "vscode";
 const bracketUtil = require("./bracketUtil");
 const history = require("./selectionHistory");
 
@@ -18,22 +16,22 @@ class SearchResult {
 
 function findBackward(text: string, index: number) {
     const bracketStack = [];
-    for (let i = index; i >= 0; i--) {
-        let char = text.charAt(i);
+    for (let offset = index; offset >= 0; offset--) {
+        let char = text.charAt(offset);
         // If it's a quote, we can not infer it is a open or close one
         // so just return, this is for the case current selection is inside a string
         if (bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
-            return new SearchResult(char, i);
+            return new SearchResult(char, offset);
         }
         if (bracketUtil.isOpenBracket(char)) {
             if (bracketStack.length === 0) {
-                return new SearchResult(char, i);
+                return new SearchResult(char, offset);
             }
             else {
                 let top = bracketStack.pop();
                 if (!bracketUtil.isMatch(char, top)) {
                     if (top === '>') {
-                        return new SearchResult(char, i);
+                        return new SearchResult(char, offset);
                     }
                     throw 'Unmatched bracket pair';
                 }
@@ -48,22 +46,22 @@ function findBackward(text: string, index: number) {
 
 function findForward(text: string, index: number) {
     const bracketStack = [];
-    for (let i = index; i < text.length; i++) {
-        let char = text.charAt(i);
+    for (let offset = index; offset < text.length; offset++) {
+        let char: string = text.charAt(offset);
         // If it's a quote, we can not infer it is a open or close one
         // so just return, this is for the case current selection is inside a string
         if (bracketUtil.isQuoteBracket(char) && bracketStack.length == 0) {
-            return new SearchResult(char, i);
+            return new SearchResult(char, offset);
         }
         if (bracketUtil.isCloseBracket(char)) {
             if (bracketStack.length == 0) {
-                return new SearchResult(char, i);
+                return new SearchResult(char, offset);
             }
             else {
                 let top = bracketStack.pop();
                 if (!bracketUtil.isMatch(top, char)) {
                     if (top === '<') {
-                        return new SearchResult(char, i);
+                        return new SearchResult(char, offset);
                     }
                     throw 'Unmatched bracket pair';
                 }
@@ -76,16 +74,52 @@ function findForward(text: string, index: number) {
     return null;
 }
 
+function findBackwardChar(text: string, seekChar: string, startingOffset: number, isSelecting: boolean) {
+    let editor = window.activeTextEditor
+    let startSelection = editor.document.positionAt(startingOffset)
+    for (let offset = startingOffset; offset >= 0; offset--) {
+        let char = text.charAt(offset)
+        if (char === seekChar) {
+            let openBracketPosition = editor.document.positionAt(offset + 1)
+            if (isSelecting) {
+                editor.selection = new Selection(startSelection, openBracketPosition);
+            }
+            else {
+                editor.selection = new Selection(openBracketPosition, openBracketPosition);
+            }
+            return;
+        }
+    };
+}
+
+function findForwardChar(text: string, seekChar: string, startingOffset: number, isSelecting: boolean) {
+    let editor = window.activeTextEditor
+    let startSelection = editor.document.positionAt(startingOffset)
+    for (let offset = startingOffset; offset <= text.length; offset++) {
+        let char = text.charAt(offset)
+        if (char === seekChar) {
+            let openBracketPosition = editor.document.positionAt(offset)
+            if (isSelecting) {
+                editor.selection = new Selection(startSelection, openBracketPosition);
+            }
+            else {
+                editor.selection = new Selection(openBracketPosition, openBracketPosition);
+            }
+            return;
+        }
+    };
+}
+
 function isMatch(r1: SearchResult, r2: SearchResult) {
     return r1 && r2 && bracketUtil.isMatch(r1.bracket, r2.bracket);
 }
 
-function expandSelection(selection: vscode.Selection, includeBracket: boolean) {
-    const editor = vscode.window.activeTextEditor;
+function expandSelection(selection: Selection, includeBracket: boolean) {
+    const editor = window.activeTextEditor;
+    const text: string = editor.document.getText();
     let selectionStart: number = editor.document.offsetAt(selection.start) - 1; //coverage vscode selection index to text index
     let selectionEnd: number = editor.document.offsetAt(selection.end);
 
-    const text: string = editor.document.getText();
 
     if (selectionStart < 0 || selectionEnd >= text.length) {
         return;
@@ -94,8 +128,7 @@ function expandSelection(selection: vscode.Selection, includeBracket: boolean) {
     let backwardResult = findBackward(text, selectionStart);
     let forwardResult = findForward(text, selectionEnd);
 
-    if (backwardResult=== null || forwardResult === null)
-    {
+    if (backwardResult === null || forwardResult === null) {
         return;
     }
 
@@ -120,14 +153,13 @@ function expandSelection(selection: vscode.Selection, includeBracket: boolean) {
             forwardResult = findForward(text, forwardResult.offset + 1);
             continue;
         }
-        vscode.window.showInformationMessage('No matched bracket pairs found');
+        window.showInformationMessage('No matched bracket pairs found');
         return;
     }
 
-    if(includeBracket)
-    {
-        return new vscode.Selection(editor.document.positionAt(backwardResult.offset),
-        editor.document.positionAt(forwardResult.offset + 1));
+    if (includeBracket) {
+        return new Selection(editor.document.positionAt(backwardResult.offset),
+            editor.document.positionAt(forwardResult.offset + 1));
     }
 
     // Ignore the whitespace to retain the formatting.
@@ -163,12 +195,12 @@ function expandSelection(selection: vscode.Selection, includeBracket: boolean) {
         selectionEnd = forwardResult.offset + 1;
     }
 
-    return new vscode.Selection(editor.document.positionAt(selectionStart + 1),
+    return new Selection(editor.document.positionAt(selectionStart + 1),
         editor.document.positionAt(selectionEnd));
 }
 
-function findWord(selection: vscode.Selection) {
-    const editor  = vscode.window.activeTextEditor;
+function findWord(selection: Selection) {
+    const editor = window.activeTextEditor;
     const text: string = editor.document.getText();
     let selectionStart: number = editor.document.offsetAt(selection.start) - 1; //coverage vscode selection index to text index
     let selectionEnd: number = editor.document.offsetAt(selection.end);
@@ -178,32 +210,34 @@ function findWord(selection: vscode.Selection) {
     }
 
     let backwardResult: number = (() => {
-        for (let i = selectionStart; i >= 0; i--) {
-        let char = text.charAt(i);
-        // Find a non alphanum with underscore
-        if (!/[a-zA-Z0-9_]/.test(char)) {
-            return i;
+        for (let offset = selectionStart; offset >= 0; offset--) {
+            let char = text.charAt(offset);
+            // Find a non alphanum with underscore
+            if (!/[a-zA-Z0-9_]/.test(char)) {
+                return offset;
+            }
         }
-    }})();
+    })();
     let forwardResult: number = (() => {
-        for (let i = selectionEnd; i < text.length; i++) {
-        let char = text.charAt(i);
-        // Find a non alphanum with underscore
-        if (!/[a-zA-Z0-9_]/.test(char)) {
-            return i;
+        for (let offset = selectionEnd; offset < text.length; offset++) {
+            let char = text.charAt(offset);
+            // Find a non alphanum with underscore
+            if (!/[a-zA-Z0-9_]/.test(char)) {
+                return offset;
+            }
         }
-    }})();
+    })();
 
-    return new vscode.Selection(editor.document.positionAt(backwardResult + 1),
-                                editor.document.positionAt(forwardResult));
+    return new Selection(editor.document.positionAt(backwardResult + 1),
+        editor.document.positionAt(forwardResult));
 }
 
 function selectContent(isDelete: boolean) {
-    const editor = vscode.window.activeTextEditor;
+    const editor = window.activeTextEditor;
     let originSelections = editor.selections;
     let selections = originSelections.map((originSelection) => {
         const newSelect = expandSelection(originSelection, false);
-        return newSelect ? newSelect: originSelection;
+        return newSelect ? newSelect : originSelection;
     });
     if (isDelete) {
         editor.edit((editBuilder) => {
@@ -221,11 +255,11 @@ function selectContent(isDelete: boolean) {
 }
 
 function selectBracket(isDelete: boolean) {
-    const editor = vscode.window.activeTextEditor;
+    const editor = window.activeTextEditor;
     let originSelections = editor.selections;
     let selections = originSelections.map((originSelection) => {
         const newSelect = expandSelection(originSelection, true);
-        return newSelect ? newSelect: originSelection;
+        return newSelect ? newSelect : originSelection;
     });
     if (isDelete) {
         editor.edit((editBuilder) => {
@@ -243,11 +277,11 @@ function selectBracket(isDelete: boolean) {
 }
 
 function selectWord(isDelete: boolean) {
-    const editor = vscode.window.activeTextEditor;
+    const editor = window.activeTextEditor;
     let originSelections = editor.selections;
     let selections = originSelections.map((originSelection) => {
         const newSelect = findWord(originSelection);
-        return newSelect ? newSelect: originSelection;
+        return newSelect ? newSelect : originSelection;
     });
     if (isDelete) {
         editor.edit((editBuilder) => {
@@ -264,16 +298,84 @@ function selectWord(isDelete: boolean) {
     }
 }
 
+function gotoChar(isGoingForward: boolean) {
+    const quickPick: QuickPick<QuickPickItem> = window.createQuickPick();
+    if (isGoingForward) {
+        quickPick.placeholder = "Going forward";
+    }
+    else {
+        quickPick.placeholder = "Going backward";
+    }
+    quickPick.prompt = "Enter character you want to jump to";
+    quickPick.onDidChangeValue((value) => {
+        if (value.length > 1) {
+            quickPick.value = value.slice(1, 2);
+        }
+    })
+    quickPick.onDidAccept(() => {
+        quickPick.hide();
+        const editor = window.activeTextEditor;
+        const text = editor.document.getText();
+        if (!isGoingForward) {
+            let selectionStart: number = editor.document.offsetAt(editor.selection.start) - 1;
+            findBackwardChar(text, quickPick.value, selectionStart, false);
+        }
+        else {
+            let selectionEnd: number = editor.document.offsetAt(editor.selection.end);
+            findForwardChar(text, quickPick.value, selectionEnd, false);
+        }
+    });
+    quickPick.show();
+}
+
+function selectToChar(isGoingForward: boolean) {
+    const quickPick: QuickPick<QuickPickItem> = window.createQuickPick();
+    if (isGoingForward) {
+        quickPick.placeholder = "Going forward";
+    }
+    else {
+        quickPick.placeholder = "Going backward";
+    }
+    quickPick.prompt = "Enter character you want to jump to";
+    quickPick.onDidChangeValue((value) => {
+        if (value.length > 1) {
+            quickPick.value = value.slice(1, 2);
+        }
+    })
+    quickPick.onDidAccept(() => {
+        quickPick.hide();
+        const editor = window.activeTextEditor;
+        const text = editor.document.getText();
+        if (!isGoingForward) {
+            let selectionStart: number = editor.document.offsetAt(editor.selection.start);
+            findBackwardChar(text, quickPick.value, selectionStart, true);
+        }
+        else {
+            let selectionEnd: number = editor.document.offsetAt(editor.selection.end);
+            findForwardChar(text, quickPick.value, selectionEnd, true);
+        }
+    });
+    quickPick.show();
+}
+
+function testFunction() {
+    console.log('Hi');
+}
+
 // Main extension point
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: ExtensionContext) {
     context.subscriptions.push(
-        vscode.commands.registerCommand('bracket-plus-plus.undo-select', history.undoSelect),
-        vscode.commands.registerCommand('bracket-plus-plus.select-content', selectContent),
-        vscode.commands.registerCommand('bracket-plus-plus.delete-content', selectContent),
-        vscode.commands.registerCommand('bracket-plus-plus.select-bracket', selectBracket),
-        vscode.commands.registerCommand('bracket-plus-plus.delete-bracket', selectBracket),
-        vscode.commands.registerCommand('bracket-plus-plus.select-word',    selectWord),
-        vscode.commands.registerCommand('bracket-plus-plus.delete-word',    selectWord)
+        commands.registerCommand('bracket-plus-plus.undo-select', history.undoSelect),
+        commands.registerCommand('bracket-plus-plus.select-content', selectContent),
+        commands.registerCommand('bracket-plus-plus.delete-content', selectContent),
+        commands.registerCommand('bracket-plus-plus.select-bracket', selectBracket),
+        commands.registerCommand('bracket-plus-plus.delete-bracket', selectBracket),
+        commands.registerCommand('bracket-plus-plus.select-word', selectWord),
+        commands.registerCommand('bracket-plus-plus.delete-word', selectWord),
+        commands.registerCommand('bracket-plus-plus.go-to-char-backward', gotoChar),
+        commands.registerCommand('bracket-plus-plus.go-to-char-forward', gotoChar),
+        commands.registerCommand('bracket-plus-plus.select-to-char-backward', selectToChar),
+        commands.registerCommand('bracket-plus-plus.select-to-char-forward', selectToChar)
     );
 }
 // This method is called when your extension is deactivated

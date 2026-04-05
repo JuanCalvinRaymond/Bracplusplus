@@ -14,10 +14,16 @@ If you want to delete the content `BracPlusPlus: Delete Inside Bracket` or type 
 ![bracket-select-animation](bracket-delete-content.gif)
 
 More Feature:
-alt+e: Select the whole bracket
-alt+f: Delete the whole bracket
-alt+d: Select a word
-alt+r: Delete a word
+`alt+e`: Select the whole bracket
+`alt+f`: Delete the whole bracket
+`alt+d`: Select a word
+`alt+r`: Delete a word
+`alt+x`: Go to char backward
+`alt+c`: Go to char forward
+`alt+g`: Select to char backward
+`alt+h`: Select to char forward
+
+All of this keybind is only to show what this plugins offers. Feel free to rebind it to whatever you like.
 
 This plugin is works for **multiple cursors**  now.
 
@@ -29,7 +35,7 @@ This plugin is works for **multiple cursors**  now.
 ## Maybe:
 * Add support to add bracket on selected word
 * Add support to swap bracket and quote type
-* Add support to go to a selected character
+* Add support to go to a selected character :white_check_mark:
 
 ## Extension Settings
 

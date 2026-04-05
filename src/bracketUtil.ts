@@ -5,19 +5,19 @@ let bracketPairs = [
     ["<", ">"],
 ];
 let quoteBrackets = ['"', "'", "`"];
-export function isMatch(open, close) {
+export function isMatch(open: string, close: string) {
     if (isQuoteBracket(open)) {
         return open === close;
     }
     return bracketPairs.findIndex(p => p[0] === open && p[1] === close) >= 0;
 }
-export function isOpenBracket(char) {
+export function isOpenBracket(char: string) {
     return bracketPairs.findIndex(pair => pair[0] === char) >= 0;
 }
-export function isCloseBracket(char) {
+export function isCloseBracket(char: string) {
     return bracketPairs.findIndex(pair => pair[1] === char) >= 0;
 }
-export function isQuoteBracket(char) {
+export function isQuoteBracket(char: string) {
     return quoteBrackets.indexOf(char) >= 0;
 }
 //# sourceMappingURL=bracketUtil.js.map

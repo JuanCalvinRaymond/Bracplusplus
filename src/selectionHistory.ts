@@ -1,14 +1,14 @@
-import * as vscode from 'vscode';
+import {Selection, window, TextEditor} from 'vscode';
 
-let selectionHistory: Array<vscode.Selection[]> = []
-vscode.window.onDidChangeActiveTextEditor(() => { selectionHistory = [] })
+let selectionHistory: Array<Selection[]> = []
+window.onDidChangeActiveTextEditor(() => { selectionHistory = [] })
 
-function selectionLength(editor: vscode.TextEditor, selection: vscode.Selection): Number {
+function selectionLength(editor: TextEditor, selection: Selection): Number {
     return editor.document.offsetAt(selection.end) - editor.document.offsetAt(selection.start);
 }
 
-export function changeSelections(selections: vscode.Selection[]) {
-    let editor: vscode.TextEditor = vscode.window.activeTextEditor;
+export function changeSelections(selections: Selection[]) {
+    let editor: TextEditor = window.activeTextEditor;
     if (selectionHistory.length > 0) {
         //if we can tell that it's a new round of commands, so that will clean the history
         let lastSelections = selectionHistory[selectionHistory.length - 1]
@@ -20,13 +20,13 @@ export function changeSelections(selections: vscode.Selection[]) {
         }
     }
 
-    let originSelections: vscode.Selection[] = editor.selections.slice();
+    let originSelections: Selection[] = editor.selections.slice();
     selectionHistory.push(originSelections);
     editor.selections = selections
 }
 
 export function undoSelect() {
-    let editor = vscode.window.activeTextEditor;
+    let editor = window.activeTextEditor;
     let lastSelections = selectionHistory.pop()
     if (lastSelections) {
         editor.selections = lastSelections;

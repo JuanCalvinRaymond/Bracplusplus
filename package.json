@@ -2,7 +2,7 @@
 	"name": "bracplusplus",
 	"displayName": "BracPlusPlus",
 	"description": "Ultimate bracket manipulation plugins. Mainly for C++",
-	"version": "1.2.1",
+	"version": "1.3.1",
 	"publisher": "juan-raymond",
 	"icon": "icon.png",
 	"engines": {
@@ -47,6 +47,22 @@
 			{
 				"command": "bracket-plus-plus.delete-word",
 				"title": "BracPlusPlus: Delete Word"
+			},
+			{
+				"command": "bracket-plus-plus.go-to-char-backward",
+				"title": "BracPlusPlus: Go To a Char Backward "
+			},
+			{
+				"command": "bracket-plus-plus.go-to-char-forward",
+				"title": "BracPlusPlus: Go To a Char Forward"
+			},
+			{
+				"command": "bracket-plus-plus.select-to-char-backward",
+				"title": "BracPlusPlus: Select To a Char Backward "
+			},
+			{
+				"command": "bracket-plus-plus.select-to-char-forward",
+				"title": "BracPlusPlus: Select To a Char Forward"
 			}
 		],
 		"keybindings": [
@@ -95,6 +111,34 @@
 				"command": "bracket-plus-plus.delete-word",
 				"key": "alt+r",
 				"mac": "alt+r",
+				"when": "editorTextFocus",
+				"args": true
+			},
+			{
+				"command": "bracket-plus-plus.go-to-char-backward",
+				"key": "alt+x",
+				"mac": "alt+x",
+				"when": "editorTextFocus",
+				"args": false
+			},
+			{
+				"command": "bracket-plus-plus.go-to-char-forward",
+				"key": "alt+c",
+				"mac": "alt+c",
+				"when": "editorTextFocus",
+				"args": true
+			},
+			{
+				"command": "bracket-plus-plus.select-to-char-backward",
+				"key": "alt+g",
+				"mac": "alt+g",
+				"when": "editorTextFocus",
+				"args": false
+			},
+			{
+				"command": "bracket-plus-plus.select-to-char-forward",
+				"key": "alt+h",
+				"mac": "alt+h",
 				"when": "editorTextFocus",
 				"args": true
 			}
